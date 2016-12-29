@@ -1,0 +1,12 @@
+<apex:page >
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script>
+function hideHdr(){
+document.getElementById('iframeID').contentDocument.getElementById('AppBodyHeader').style.display = 'none';   
+}
+window.onload = hideHdr;
+</script>
+ <apex:pageBlock >
+     <apex:iframe id="iframeID" scrolling="true" title="VSU" height="800" width="1200" src="https://kuhi-dev-developer-edition.ap1.force.com/_ui/core/userprofile/UserProfilePage?u=005900000069vDr&tab=sfdc.ProfilePlatformFeed"/>
+ </apex:pageBlock>
+</apex:page>

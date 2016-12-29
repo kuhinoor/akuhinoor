@@ -1,0 +1,45 @@
+<apex:page >
+<head>
+<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>    
+<script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.13.1/jquery.validate.min.js">    
+</script>
+<script src='https://www.google.com/recaptcha/api.js'></script>
+<script type="text/javascript">
+(function($,W,D) {
+    var JQUERY4U = {};
+    JQUERY4U.UTIL = {
+    setupFormValidation: function() {
+        $('#google_form').validate({
+        ignore: ":hidden:not(#keycode)",
+        rules: {       
+        "hiddencode": {
+        required: function() {
+        if(grecaptcha.getResponse() == '') {
+            return true;
+        } else { return false; }
+        } } }
+    });
+    } }
+    $(D).ready(function($) {
+        JQUERY4U.UTIL.setupFormValidation();
+    });
+})(jQuery, window, document);
+</script>
+</head>
+<body>
+    <form method="post" id="google_form">
+     <p><label>Name</label>
+     <input type="text" name="username" class="required" /></p>
+     <p><label>Email</label>
+     <input type="text" name="email" class="required email" /></p>
+     <p><label>Phone</label>
+     <input type="text" name="phone" class="required number" /></p>
+     <p><label>Address</label>
+     <input type="text" name="address" class="required" /></p>
+     <p><button>Submit</button>
+    <!-- <div class="g-recaptcha" data-sitekey="Enter here your key"></div>-->
+     <div class="g-recaptcha" data-sitekey="6LeyYSgTAAAAADtTmhioArv9-H1R3gu7Rw9FjUMR"></div>
+     <input type="hidden" title="Please verify this" class="required" name="keycode" id="keycode" /></p>
+    </form>
+</body>
+</apex:page>

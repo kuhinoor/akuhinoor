@@ -1,0 +1,6 @@
+<apex:page controller="Timer">
+    <apex:form >
+        <apex:outputText value="Watch this counter: {!count}" id="counter"/>
+        <apex:actionPoller action="{!incrementCounter}" rerender="counter" interval="5"/>
+    </apex:form>
+</apex:page>

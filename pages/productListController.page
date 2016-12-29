@@ -1,0 +1,86 @@
+<apex:page controller="productListController">
+    <head>
+    <title>Product List</title>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            getProducts(function(){
+                $('.cacheable').each(function(index){
+                    var img = $(this);
+                     getImage($(this).attr('id'),function(imageId,imageData){
+                         $(img).attr('src', 'data:image/png;base64,'+imageData);
+                     });
+                });               
+            });            
+        });  
+
+        function getProducts(callback)
+        {
+                    Visualforce.remoting.Manager.invokeAction(
+                        '{!$RemoteAction.productListController.getProducts}',
+                        function(result, event)
+                        {
+                            if (event.status && (result.success == true || result.success == 'true')) 
+                            {    
+                               var html='';
+                               for(var i = 0; i<result.sObjects.length;i++)
+                               {
+                                   var imageId = 'default image id here';
+                                   if(result.sObjects[i].hasOwnProperty('Attachments'))
+                                   {
+                                        imageId = result.sObjects[i].Attachments[0].Id;
+                                   }
+                                   html += '<li><img class="cacheable"  id="'+imageId+'">'+result.sObjects[i].Name+'</li>';
+
+                               }
+                               $('#products').html(html);
+                               callback();
+                            } 
+                            else
+                            {
+                                $("#responseErrors").html(event.message);
+                            }
+                        }, 
+                        {escape: true});                   
+        } 
+
+        function getImage(imageId,callback)
+        {
+             var imageData;
+
+              if ( localStorage.getItem(imageId))
+              {   
+                console.log('Getting image from local storage!');
+                imageData = localStorage.getItem(imageId);
+                callback(imageId,imageData);    
+              }
+              else 
+              {
+                   console.log('Getting image remote server!');
+                    Visualforce.remoting.Manager.invokeAction(
+                        '{!$RemoteAction.productListController.getAttachment}',
+                        imageId,
+                        function(result, event)
+                        {
+                            if (event.status && (result.success == true || result.success == 'true')) 
+                            {    
+                                 imageData = result.data;
+                                 localStorage.setItem(imageId,imageData);      
+                                 callback(imageId,imageData);    
+                            } 
+                            else
+                            {
+                                $("#responseErrors").html(event.message);
+                            }
+                        }, 
+                        {escape: true});                   
+              }      
+        } 
+    </script>
+    </head>
+
+    <body>
+            <ul  id="products"></ul>
+    </body>            
+</apex:page>

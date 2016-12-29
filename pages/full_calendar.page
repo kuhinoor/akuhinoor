@@ -1,0 +1,88 @@
+<apex:page sidebar="false" controller="eventController">
+<head>
+<meta charset='utf-8' />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.1.1/fullcalendar.min.css" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.1.1/fullcalendar.print.css" rel="stylesheet" media="print"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.3/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.1.1/fullcalendar.min.js"></script>
+<script>
+
+    $(document).ready(function(){        
+        $('#calendar').fullCalendar({
+           header: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'month,agendaWeek,agendaDay,listMonth'
+            },
+            
+            defaultDate: '2016-10-20',
+            navLinks: true, // can click day/week names to navigate views
+            editable: true,
+            eventLimit: true, // allow "more" link when too many events
+             eventMouseover: function (data, event, view) {
+
+            tooltip = '<div class="tooltiptopicevent" style="width:auto;height:auto;background:#feb811;position:absolute;z-index:10001;padding:10px 10px 10px 10px ;  line-height: 200%;">' + 'Title: ' + ': ' + '<b>'+data.title +'</b>'+ '</br>' + 'Start: ' + ': ' + data.start.format()+'</br>' + 'End: ' + ': ' + data.end.format() + '</div>';
+
+
+            $("body").append(tooltip);
+            $(this).mouseover(function (e) {
+                $(this).css('z-index', 10000);
+                $('.tooltiptopicevent').fadeIn('500');
+                $('.tooltiptopicevent').fadeTo('10', 1.9);
+            }).mousemove(function (e) {
+                $('.tooltiptopicevent').css('top', e.pageY+8);
+                $('.tooltiptopicevent').css('left', e.pageX+8);
+            });
+
+
+        },
+        eventMouseout: function (data, event, view) {
+            $(this).css('z-index', 8);
+
+            $('.tooltiptopicevent').remove();
+
+        },
+        dayClick: function () {
+            tooltip.hide()
+        },
+        eventResizeStart: function () {
+            tooltip.hide()
+        },
+        eventDragStart: function () {
+            tooltip.hide()
+        },
+        viewDisplay: function () {
+            tooltip.hide()
+        },
+            events: {!eventStr},
+                eventClick: function(event) {
+                    if (event.url) {
+                        window.open(event.url);
+                        return false;
+                    }
+                },
+                dayClick: function(date, jsEvent, view) {
+                    alert('Clicked on: ' + date.format());        
+                    //alert('Coordinates: ' + jsEvent.pageX + ',' + jsEvent.pageY);        
+                    //alert('Current view: ' + view.name);        
+                    // change the day's background color just for fun
+                    $(this).css('background-color', 'blue');
+                    //window.open(date);          
+                    },                    
+                    eventClick:  function(event, jsEvent, view) {
+                        alert('clicked...');
+                        //$("#eventContent").dialog({ modal: true, title: event.title });
+                    }
+        }); 
+    });     
+</script> 
+</head>
+<body>
+   {!eventStr}
+  <div id="calendar"></div> 
+ 
+</body>
+
+
+</apex:page>

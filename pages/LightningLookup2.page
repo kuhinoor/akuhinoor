@@ -1,0 +1,114 @@
+<apex:page showHeader="false" sidebar="false" standardStylesheets="false" showQuickActionVfHeader="false" docType="html-5.0" controller="MobileController">
+<html xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <title>Trinity Mirror</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <apex:stylesheet value="{!URLFOR($Resource.slds, 'assets/styles/salesforce-lightning-design-system-vf.css')}" /> 
+    <script src="//code.jquery.com/jquery-1.9.1.min.js"></script>
+   <!--- <script src="{!URLFOR($Resource.jquery_all, 'jquery.min.js')}" ></script> -->
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+    <script>
+        var $ = jQuery.noConflict();
+    </script>
+</head>
+
+<body>
+    
+    <div class="slds">
+        <div class="slds-grid">
+            <div class="slds-col--padded">
+                <h3 class="slds-section-title--divider">Lookup</h3>
+            </div>
+        </div>
+
+        <div class="slds-grid slds-wrap">
+            <div class="slds-col--padded slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+                <div class="slds-form--stacked">
+                    <div class="slds-lookup" data-select="multi" data-scope="single" data-typeahead="true">
+                          <div class="slds-form-element">
+                            <label class="slds-form-element__label" for="lookup">Contacts</label>
+                            <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon--right">
+                              <svg aria-hidden="true" class="slds-input__icon">
+                                <use xlink:href="{!URLFOR ($Resource.slds, 'assets/icons/utility-sprite/svg/symbols.svg#search')}"></use>
+                              </svg>                              
+                              <input id="lookup" value="" class="slds-input" type="text" aria-autocomplete="list" role="combobox" aria-expanded="false" aria-activedescendant="" />
+                            </div>
+                          </div>
+                          <div class="slds-lookup__menu" role="listbox" id="results" style="display:none">
+                            <div class="slds-lookup__item">
+                              <button class="slds-button">
+                                <svg aria-hidden="true" class="slds-icon slds-icon-text-default slds-icon--small">
+                                  <use xlink:href="{!URLFOR ($Resource.slds, 'assets/icons/utility-sprite/svg/symbols.svg#search')}"></use>
+                                </svg>&quot;<span id="keyword"></span>&quot; in Contacts</button>
+                            </div>
+                            <ul class="slds-lookup__list" role="presentation" id="ui_results">                                                                                       
+                            </ul>                           
+                          </div>
+                        </div>
+
+                </div>
+            </div>
+      
+        </div>
+    </div>
+        
+    <script>        
+    
+        $(document).ready(function() 
+         {  
+            $('#lookup').keyup(function(e) 
+            {                                  
+               $('#results').css("display","block");
+               $('#lookup').attr('aria-expanded','true'); 
+               $('#keyword').html($('#lookup').val());
+               Visualforce.remoting.Manager.invokeAction(
+                '{!$RemoteAction.MobileController.queryContacts}',
+                $('#lookup').val(),                                                 
+                 function(result, event){
+                    if (event.status) {
+                        $('#ui_results').empty();
+                        populateLookup(result);
+                    } else if (event.type === 'exception') {
+                        $('#lookup') = 'ERROR: ' + event.message;   
+                    } else {
+                        $('#lookup') = 'ERROR: ' + event.message;
+                    }
+                }, 
+                {escape: true}
+                );            
+            });
+            function populateLookup(result){
+                 if(result){                        
+                        $( result ).each(function() {                        
+                            console.log(this);
+                            $('#ui_results').append('<li class="slds-lookup__item">' + 
+                                    '<a id="' + this.id + '" href="javascript:void(0)" role="option">' + 
+                                      '<svg aria-hidden="true" class="slds-icon slds-icon-standard-account slds-icon--small">' + 
+                                        '<use xlink:href="{!URLFOR ($Resource.slds, 'assets/icons/utility-sprite/svg/symbols.svg#user')}"></use>' + 
+                                      '</svg>' + this.FirstName+ ' ' + this.LastName +'</a>' + 
+                                  '</li>');
+                        });
+                
+                $('ul.slds-lookup__list a').click(function(e) 
+                    {                                  
+                        $('#lookup').val($(this)[0].innerText);
+                        $('#lookup').attr('aria-activedescendant',$(this)[0].id);
+                        $('#lookup').attr('aria-expanded','false');
+                        $('#results').css("display","none");
+                    }); 
+                }
+        }
+        
+
+    });
+       
+     </script>
+</body>
+</html> 
+</apex:page>

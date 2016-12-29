@@ -1,0 +1,14 @@
+<apex:page controller="AttachmentDisplayController">
+ <apex:pageBlock >
+    <table>
+      <tr>
+     <apex:variable value="{!0}" var="rowNum"/>
+     <apex:repeat value="{!attLst}" var="at">
+         <td>{!IF(LEN(at.Name)>30,LEFT(at.Name,20)+'....',at.Name)}</td>
+       <apex:variable var="rowNum" value="{!rowNum + 1}"/>
+      <apex:outputpanel rendered="{!mod(rowNum ,3)==0}"><tr></tr></apex:outputPanel>
+     </apex:repeat>
+     </tr>     
+     </table>
+ </apex:pageBlock>
+</apex:page>

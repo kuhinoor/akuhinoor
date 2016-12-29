@@ -1,0 +1,182 @@
+<apex:page showHeader="false" controller="loginController" standardStylesheets="false" sidebar="false" applyHtmlTag="false" applyBodyTag="false" docType="html-5.0">
+    <html xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" lang="en">
+        <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        
+        <title>Salesforce Lightning Design System Trailhead Module</title>
+       
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <apex:stylesheet value="{!URLFOR($Resource.slds, 'assets/styles/salesforce-lightning-design-system-vf.css')}" /> 
+        <style>        
+           .panel-default {              
+               border-color: #337AB7;   
+              
+           }
+           .panel {
+               background-color: #fff;
+               border: 0px solid #ccc;
+               border-radius: 4px;
+               box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+               margin-bottom: 20px;
+                color:white;
+               background-image :url('https://upload.wikimedia.org/wikipedia/commons/f/f1/Trains_de_la_Bernina_en_hiver_7.jpg'); 
+           }
+           .panel-default > .panel-heading {
+               background-color: #337AB7;
+               border-color: #ddd;
+               color: white;
+               text-align: left;
+               padding: 3%;
+               filter: alpha(opacity=80);
+               opacity: 0.8;
+               z-index: 10000;
+           }
+           .panel-heading {
+               border-bottom: 1px solid transparent;
+               border-top-left-radius: 3px;
+               border-top-right-radius: 3px;
+               padding: 10px 15px;
+           }
+           .panel-body {
+               padding: 15px;              
+           }     
+           .btn{
+             width: 70%;
+           }  
+           .slds .slds-text-heading--small {                
+                color: white;
+            } 
+        </style>       
+        </head>
+        <body  style="background-image :url('https://upload.wikimedia.org/wikipedia/commons/f/f1/Trains_de_la_Bernina_en_hiver_7.jpg')">        
+        <!-- REQUIRED SLDS WRAPPER -->
+       <apex:form >
+        <div class="slds">
+            <div class="slds-grid">
+                <div class="slds-col"> </div>
+                <div class="slds-col" style="padding-top : 10%;">
+                
+              <!----------------------------Login Form-------------------------------------->
+                    <div class="panel panel-default" style="display: none">
+                    <div class="panel-heading" id='test'><b>Login</b></div>
+                    <div class="panel-body" style="overflow-y: auto;"> 
+                        <div class="slds-form-element">                                                                         
+                         
+                         <label class="slds-form-element__label" for="text-input-01">
+                              <div class="slds-text-heading--small">UserName</div>
+                          </label>
+                          <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon--left">
+                            <svg aria-hidden="true" class="slds-input__icon slds-icon-text-default">
+                              <use xlink:href="{!URLFOR($Resource.slds, '/assets/icons/utility-sprite/svg/symbols.svg#user')}"></use>
+                            </svg>
+                                <apex:inputText styleClass="slds-input" value="{!userName}" />
+                          </div> 
+                         
+                          <label class="slds-form-element__label" for="text-input-01">                          
+                          <div class="slds-text-heading--small">Password</div></label>
+                          <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon--left">
+                            <svg aria-hidden="true" class="slds-input__icon slds-icon-text-default">
+                              <use xlink:href="{!URLFOR($Resource.slds, '/assets/icons/utility-sprite/svg/symbols.svg#lock')}"></use>
+                            </svg>
+                            
+                            <apex:inputSecret value="{!passwrd}" styleClass="slds-input"/>                           
+                          </div>
+                                                    
+                          <div style="padding-left: 20%;padding-top: 10%;">
+                              <button class="slds-button slds-button--brand btn">Login</button>
+                          </div>
+                          
+                          <div style="padding-top: 5%;">
+                          <button class="slds-button slds-button--icon" title="settings">
+                              <svg aria-hidden="true" class="slds-button__icon">
+                                <use xlink:href="{!URLFOR($Resource.slds, '/assets/icons/utility-sprite/svg/symbols.svg#help')}"></use>
+                              </svg>
+                              <span class="slds-assistive-text">help</span>
+                            </button>
+                          <a><span class="slds-text-link">Forget Password</span></a>
+                          </div>
+                          
+                        </div>                                  
+                      </div>
+                    </div> 
+                  <!----------------------------Login Form-------------------------------------->
+                  <!----------------------------SignUp Form--------------------------------------> 
+                   <div class="panel panel-default">
+                    <div class="panel-heading" id='test'><b>SignUp</b></div>
+                    <div class="panel-body" style="overflow-y: auto;"> 
+                        <div class="slds-form-element"> 
+                         <table>
+                         <tr>
+                         <td>
+                          <label class="slds-form-element__label" for="text-input-01">
+                              <div class="slds-text-heading--small">FirstName</div>
+                          </label>
+                          <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon--left">
+                            <svg aria-hidden="true" class="slds-input__icon slds-icon-text-default">
+                              <use xlink:href="{!URLFOR($Resource.slds, '/assets/icons/utility-sprite/svg/symbols.svg#user')}"></use>
+                            </svg>
+                             <apex:inputField styleClass="slds-input" value="{!registration.FirstName__c}"/>                            
+                          </div>     
+                          </td>
+                          <td>
+                          <label class="slds-form-element__label" for="text-input-01">
+                              <div class="slds-text-heading--small">LastName</div>
+                          </label>
+                          <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon--left">
+                            <svg aria-hidden="true" class="slds-input__icon slds-icon-text-default">
+                              <use xlink:href="{!URLFOR($Resource.slds, '/assets/icons/utility-sprite/svg/symbols.svg#user')}"></use>
+                            </svg>
+                                <apex:inputField styleClass="slds-input"  value="{!registration.Last_Name__c}"/>
+                          </div>     
+                          </td>
+                          </tr>
+                          </table>
+                        
+                          <label class="slds-form-element__label" for="text-input-01">
+                              <div class="slds-text-heading--small">UserName</div>
+                          </label>
+                          <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon--left">
+                            <svg aria-hidden="true" class="slds-input__icon slds-icon-text-default">
+                              <use xlink:href="{!URLFOR($Resource.slds, '/assets/icons/utility-sprite/svg/symbols.svg#user')}"></use>
+                            </svg>
+                            <apex:inputField styleClass="slds-input" value="{!registration.User_Name__c}" />
+                          </div> 
+                                                                             
+                          <label class="slds-form-element__label" for="text-input-01">                          
+                          <div class="slds-text-heading--small">Password</div></label>
+                          <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon--left">
+                            <svg aria-hidden="true" class="slds-input__icon slds-icon-text-default">
+                              <use xlink:href="{!URLFOR($Resource.slds, '/assets/icons/utility-sprite/svg/symbols.svg#lock')}"></use>
+                            </svg>
+                            <apex:inputSecret styleclass="slds-input" value="{!registration.Password__c}"/>                            
+                          </div> 
+                                                   
+                          <label class="slds-form-element__label" for="text-input-01">                          
+                          <div class="slds-text-heading--small">ReType Password</div></label>
+                          <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon--left">
+                            <svg aria-hidden="true" class="slds-input__icon slds-icon-text-default">
+                              <use xlink:href="{!URLFOR($Resource.slds, '/assets/icons/utility-sprite/svg/symbols.svg#lock')}"></use>
+                            </svg>
+                            <input id="text-input-01" class="slds-input" type="password" />
+                          </div>
+                                                    
+                          <div style="padding-left: 20%;padding-top: 10%;">
+                            <apex:commandButton styleClass="slds-button slds-button--brand btn" value="Signup" action="{!register}" />
+                          </div>
+                          
+                          
+                        </div>                                  
+                      </div>
+                    </div> 
+                  
+                  <!----------------------------SignUp Form End----------------------------------->                                       
+                </div>
+                
+                <div class="slds-col"> </div>
+            </div>
+        </div>
+        </apex:form>
+        </body>
+    </html>
+</apex:page>

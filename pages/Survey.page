@@ -1,0 +1,196 @@
+<apex:page controller="surveyController" sidebar="false"  applyBodyTag="false" standardStylesheets="false" showHeader="false" applyHtmlTag="false">
+ <apex:form >
+  <html xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <head>
+          <title>NAU Survey</title>    
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>        
+            <apex:stylesheet value="{!URLFOR($Resource.slds, 'assets/styles/salesforce-lightning-design-system-vf.css')}" />
+         
+            <style>    
+                .custPopup{
+                     left:45%;
+                     z-index: 9999;
+                     position:absolute; 
+                 } 
+                
+                .popupBackground{ 
+                    background-color:white;
+                    opacity: 0.50;
+                    filter: alpha(opacity = 50);
+                    position:absolute;
+                    width: 100%;
+                    height: 100%;
+                    top: 0;
+                    left: 0;
+                    z-index: 9998; 
+                }  
+                 .panel-default {
+                border-color: #337AB7;
+                }
+                .panel {
+                background-color: #fff;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+                margin-bottom: 20px;
+                }
+                .panel-default > .panel-heading {
+                background-color: #337AB7;
+                border-color: #ddd;
+                color: white;
+                }
+                .panel-heading {
+                border-bottom: 1px solid transparent;
+                border-top-left-radius: 3px;
+                border-top-right-radius: 3px;
+                padding: 10px 15px;
+                }
+                .panel-body {
+                padding: 15px;
+                }
+                .custPopup{
+                     left:45%;
+                     z-index: 9999;
+                     position:absolute; 
+                 } 
+                
+                .popupBackground{ 
+                    background-color:white;
+                    opacity: 0.50;
+                    filter: alpha(opacity = 50);
+                    position:absolute;
+                    width: 100%;
+                    height: 100%;
+                    top: 0;
+                    left: 0;
+                    z-index: 9998; 
+                }  
+                </style>
+                <script>   
+                    $(document).ready(function(){                   
+                        sethidenans();
+                    });
+                    function getOptionValue(){
+                        var radiobtn = $('input[name="options"]:checked').val();                       
+                        next(radiobtn);
+                    }
+                    function sethidenans(){
+                        var hideval = $("[id$=hidAnswer]").val();  
+                                            
+                       if(hideval.length==0 || hideval==''){
+                           $("input[type='radio']").removeAttr('checked');  
+                       }else{                          
+                          $("input[type='radio']").each(function(){
+                         if($(this).val()== hideval)
+                            $(this).prop("checked","checked");
+                        });      
+                       }
+                        
+                    }
+                </script>
+                </head>
+                <apex:actionFunction action="{!next}" name="next" reRender="pnl,pnl2" oncomplete="sethidenans();" status="status" >
+                <apex:param name="param" assignTo="{!answer}" value=""/>
+                 </apex:actionFunction>
+                 <apex:actionFunction action="{!pre}" name="pre" reRender="pnl,pnl2" oncomplete="sethidenans();" status="status"/>
+                  <apex:actionStatus startText="loading....." id="status">
+                <apex:facet name="start">
+                   <apex:outputPanel id="tstpopup"> 
+                    <apex:outputPanel styleClass="popupBackground" layout="block" style="width:100%"/> 
+                        <apex:outputPanel styleClass="custPopup" layout="block"> 
+                            <div class="slds-spinner--brand slds-spinner slds-spinner--large">
+                            <img src="{!URLFOR($Resource.slds, 'assets/images/spinners/slds_spinner_brand.gif')}" alt="Loading..." style="margin-top:150%;height:70%;width:70%"/>
+                            </div>
+                        </apex:outputPanel> 
+                    </apex:outputPanel>                 
+                         
+                </apex:facet>
+            </apex:actionStatus> 
+                 <div class="slds">
+            <div class="slds-page-header" role="banner" id="header"> 
+                <div class="slds-grid">
+                    <div class="slds-col">
+                        <div class="slds-media">
+                            <div class="slds-media__figure">  
+                                <img src="" width="70" height="50"/>
+                            </div>
+                            <div class="slds-media__body">                                   
+                                <div class="slds-media__body" >                                   
+                                    <h1 class="slds-text-heading--medium" style="margin-top:3%;"><b>NAU Survey</b></h1>                                
+                                </div>
+                                
+                            </div>                                
+                        </div>
+                    </div>
+                    
+                    <div class="slds-col">    
+                        <P class="slds-text-align--right" style="margin-top:8%;">
+                           <b>Time Remaining :</b> <span id="countdown" class="timer"></span> Hours
+                        </P>
+                    </div>
+                </div>
+            </div>
+            <!--------------------------Header------------------------------------>  
+            <!---------------------------body------------------------------------->
+           <apex:outputPanel id="pnl">  
+           {!slno} 
+           --->>Size : {!surveyQuestionLst}
+           <apex:inputHidden id="hidAnswer" value="{!answer}"/>
+             <div class="slds-grid" style="margin-top:5%;padding-left: 10%;padding-right: 11%;">                    
+                    <div class="slds-col">
+                        <div class="slds">    
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                   <b>{!surveyQuestion.survey__r.Name}</b>                        
+                                </div>
+                                <div style="width:95%;margin:auto;">
+                                  <table class="slds-table">
+                                      <tr>
+                                          <td style="width:10px;">{!surveyQuestion.Question_No__c }</td>  
+                                           <td>{!surveyQuestion.Question__c }</td>                                        
+                                      </tr>
+                                      <tr>
+                                          <td colspan="2">
+                                          <label class="slds-radio">
+                                          -->{!answer}
+                                          <input type="radio" name="options" value="A" checked="{!IF(answer=='A','checked','')}" />
+                                           
+                                          <span class="slds-radio--faux"></span>                                          
+                                          </label>
+                                          {!surveyQuestion.option_A__c}
+                                          </td>
+                                      </tr>
+                                      <tr>
+                                          <td colspan="2">
+                                          <label class="slds-radio">
+                                          <input type="radio" name="options" value="B" checked="{!IF(answer=='B','checked','')}"/>
+                                          <span class="slds-radio--faux"></span>                                          
+                                          </label>
+                                          {!surveyQuestion.option_B__c}
+                                          </td>
+                                      </tr>
+                                  </table>
+                                </div>
+                            </div>
+                        </div>
+                       </div>
+                      </div>     
+            </apex:outputPanel>   
+            
+            <apex:outputPanel id="pnl2" >
+                <div class="slds-grid">
+                    <div class="slds-col"></div>
+                    <div class="slds-col"></div>
+                    <div class="slds-col">                     
+                        <button  class="slds-button slds-button--neutral" onClick="pre(); return false;" >Previous</button>
+                        <button class="slds-button slds-button--neutral " onClick="getOptionValue(); return false;" >Next</button>
+                      
+                        
+                    </div>
+                    <div class="slds-col"></div>
+                </div>
+                 </apex:outputPanel> 
+                 </div>
+                </html>
+  </apex:form>              
+</apex:page>

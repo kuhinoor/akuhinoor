@@ -1,0 +1,299 @@
+<apex:page sidebar="false" showHeader="false">
+ <head> 
+    <script src="{!URLFOR($Resource.sketch,'sketch/jquery.min.js')}"></script>
+    <script src="{!URLFOR($Resource.sketch,'sketch/sketch.js')}"></script>
+    <script src="{!URLFOR($Resource.sketch,'sketch/html2canvas.js')}"></script>   
+    <script>
+        var Canvas2Image = function () {
+    // check if support sth.
+    var $support = function () {
+        var canvas = document.createElement('canvas'),
+            ctx = canvas.getContext('2d');
+        return {
+            canvas: !!ctx,
+            imageData: !!ctx.getImageData,
+            dataURL: !!canvas.toDataURL,
+            btoa: !!window.btoa
+        };
+    }();
+
+    var downloadMime = 'image/octet-stream';
+
+    function scaleCanvas (canvas, width, height) {
+        var w = canvas.width,
+            h = canvas.height;
+        if (width == undefined) {
+            width = w;
+        }
+        if (height == undefined) {
+            height = h;
+        }
+        var retCanvas = document.createElement('canvas');
+        var retCtx = retCanvas.getContext('2d');
+        retCanvas.width = width;
+        retCanvas.height = height;
+        retCtx.drawImage(canvas, 0, 0, w, h, 0, 0, width, height);
+        return retCanvas;
+    }
+
+    function getDataURL (canvas, type, width, height) {
+        canvas = scaleCanvas(canvas, width, height);
+        return canvas.toDataURL(type);
+        alert(canvas.toDataURL(type));
+    }
+
+    function saveFile (strData) {
+        document.location.href = strData;
+    }
+
+    function genImage(strData) {
+        var img = document.createElement('img');
+        img.src = strData;
+        return img;
+    }
+    function fixType (type) {
+        type = type.toLowerCase().replace(/jpg/i, 'jpeg');
+        var r = type.match(/png|jpeg|bmp|gif/)[0];
+        return 'image/' + r;
+    }
+    function encodeData (data) {
+        if (!window.btoa) { throw 'btoa undefined' }
+        var str = '';
+        if (typeof data == 'string') {
+            str = data;
+        } else {
+            for (var i = 0; i < data.length; i ++) {
+                str += String.fromCharCode(data[i]);
+            }
+        }
+
+        return btoa(str);
+    }
+    function getImageData (canvas) {
+        var w = canvas.width,
+            h = canvas.height;
+        return canvas.getContext('2d').getImageData(0, 0, w, h);
+    }
+    function makeURI (strData, type) {
+        return 'data:' + type + ';base64,' + strData;
+        alert(type+strData);
+    }
+
+
+    /**
+     * create bitmap image
+     * 按照规则生成图片响应头和响应体
+     */
+    var genBitmapImage = function (oData) {
+
+        //
+        // BITMAPFILEHEADER: http://msdn.microsoft.com/en-us/library/windows/desktop/dd183374(v=vs.85).aspx
+        // BITMAPINFOHEADER: http://msdn.microsoft.com/en-us/library/dd183376.aspx
+        //
+
+        var biWidth  = oData.width;
+        var biHeight    = oData.height;
+        var biSizeImage = biWidth * biHeight * 3;
+        var bfSize  = biSizeImage + 54; // total header size = 54 bytes
+
+        //
+        //  typedef struct tagBITMAPFILEHEADER {
+        //      WORD bfType;
+        //      DWORD bfSize;
+        //      WORD bfReserved1;
+        //      WORD bfReserved2;
+        //      DWORD bfOffBits;
+        //  } BITMAPFILEHEADER;
+        //
+        var BITMAPFILEHEADER = [
+            // WORD bfType -- The file type signature; must be "BM"
+            0x42, 0x4D,
+            // DWORD bfSize -- The size, in bytes, of the bitmap file
+            bfSize & 0xff, bfSize >> 8 & 0xff, bfSize >> 16 & 0xff, bfSize >> 24 & 0xff,
+            // WORD bfReserved1 -- Reserved; must be zero
+            0, 0,
+            // WORD bfReserved2 -- Reserved; must be zero
+            0, 0,
+            // DWORD bfOffBits -- The offset, in bytes, from the beginning of the BITMAPFILEHEADER structure to the bitmap bits.
+            54, 0, 0, 0
+        ];
+
+        //
+        //  typedef struct tagBITMAPINFOHEADER {
+        //      DWORD biSize;
+        //      LONG  biWidth;
+        //      LONG  biHeight;
+        //      WORD  biPlanes;
+        //      WORD  biBitCount;
+        //      DWORD biCompression;
+        //      DWORD biSizeImage;
+        //      LONG  biXPelsPerMeter;
+        //      LONG  biYPelsPerMeter;
+        //      DWORD biClrUsed;
+        //      DWORD biClrImportant;
+        //  } BITMAPINFOHEADER, *PBITMAPINFOHEADER;
+        //
+        var BITMAPINFOHEADER = [
+            // DWORD biSize -- The number of bytes required by the structure
+            40, 0, 0, 0,
+            // LONG biWidth -- The width of the bitmap, in pixels
+            biWidth & 0xff, biWidth >> 8 & 0xff, biWidth >> 16 & 0xff, biWidth >> 24 & 0xff,
+            // LONG biHeight -- The height of the bitmap, in pixels
+            biHeight & 0xff, biHeight >> 8  & 0xff, biHeight >> 16 & 0xff, biHeight >> 24 & 0xff,
+            // WORD biPlanes -- The number of planes for the target device. This value must be set to 1
+            1, 0,
+            // WORD biBitCount -- The number of bits-per-pixel, 24 bits-per-pixel -- the bitmap
+            // has a maximum of 2^24 colors (16777216, Truecolor)
+            24, 0,
+            // DWORD biCompression -- The type of compression, BI_RGB (code 0) -- uncompressed
+            0, 0, 0, 0,
+            // DWORD biSizeImage -- The size, in bytes, of the image. This may be set to zero for BI_RGB bitmaps
+            biSizeImage & 0xff, biSizeImage >> 8 & 0xff, biSizeImage >> 16 & 0xff, biSizeImage >> 24 & 0xff,
+            // LONG biXPelsPerMeter, unused
+            0,0,0,0,
+            // LONG biYPelsPerMeter, unused
+            0,0,0,0,
+            // DWORD biClrUsed, the number of color indexes of palette, unused
+            0,0,0,0,
+            // DWORD biClrImportant, unused
+            0,0,0,0
+        ];
+
+        var iPadding = (4 - ((biWidth * 3) % 4)) % 4;
+
+        var aImgData = oData.data;
+
+        var strPixelData = '';
+        var biWidth4 = biWidth<<2;
+        var y = biHeight;
+        var fromCharCode = String.fromCharCode;
+
+        do {
+            var iOffsetY = biWidth4*(y-1);
+            var strPixelRow = '';
+            for (var x = 0; x < biWidth; x++) {
+                var iOffsetX = x<<2;
+                strPixelRow += fromCharCode(aImgData[iOffsetY+iOffsetX+2]) +
+                               fromCharCode(aImgData[iOffsetY+iOffsetX+1]) +
+                               fromCharCode(aImgData[iOffsetY+iOffsetX]);
+            }
+
+            for (var c = 0; c < iPadding; c++) {
+                strPixelRow += String.fromCharCode(0);
+            }
+
+            strPixelData += strPixelRow;
+        } while (--y);
+
+        var strEncoded = encodeData(BITMAPFILEHEADER.concat(BITMAPINFOHEADER)) + encodeData(strPixelData);
+
+        return strEncoded;
+    };
+
+    /**
+     * saveAsImage
+     * @param canvasElement
+     * @param {String} image type
+     * @param {Number} [optional] png width
+     * @param {Number} [optional] png height
+     */
+    var saveAsImage = function (canvas, width, height, type) {
+        if ($support.canvas && $support.dataURL) {
+            if (typeof canvas == "string") { canvas = document.getElementById(canvas); }
+            if (type == undefined) { type = 'png'; }
+            type = fixType(type);
+            if (/bmp/.test(type)) {
+                var data = getImageData(scaleCanvas(canvas, width, height));
+                var strData = genBitmapImage(data);
+                alert(strData);
+                saveFile(makeURI(strData, downloadMime));
+            } else {
+                var strData = getDataURL(canvas, type, width, height);
+                saveFile(strData.replace(type, downloadMime));
+            }
+        }
+    };
+
+    var convertToImage = function (canvas, width, height, type) {
+        if ($support.canvas && $support.dataURL) {
+            if (typeof canvas == "string") { canvas = document.getElementById(canvas); }
+            if (type == undefined) { type = 'png'; }
+            type = fixType(type);
+
+            if (/bmp/.test(type)) {
+                var data = getImageData(scaleCanvas(canvas, width, height));
+                var strData = genBitmapImage(data);
+                return genImage(makeURI(strData, 'image/bmp'));
+            } else {
+                var strData = getDataURL(canvas, type, width, height);
+                return genImage(strData);
+            }
+        }
+    };
+
+
+
+    return {
+        saveAsImage: saveAsImage,
+        saveAsPNG: function (canvas, width, height) {
+            return saveAsImage(canvas, width, height, 'png');
+        },
+        saveAsJPEG: function (canvas, width, height) {
+            return saveAsImage(canvas, width, height, 'jpeg');
+        },
+        saveAsGIF: function (canvas, width, height) {
+            return saveAsImage(canvas, width, height, 'gif');
+        },
+        saveAsBMP: function (canvas, width, height) {
+            return saveAsImage(canvas, width, height, 'bmp');
+        },
+
+        convertToImage: convertToImage,
+        convertToPNG: function (canvas, width, height) {
+            return convertToImage(canvas, width, height, 'png');
+        },
+        convertToJPEG: function (canvas, width, height) {
+            return convertToImage(canvas, width, height, 'jpeg');
+        },
+        convertToGIF: function (canvas, width, height) {
+            return convertToImage(canvas, width, height, 'gif');
+        },
+        convertToBMP: function (canvas, width, height) {
+            return convertToImage(canvas, width, height, 'bmp');
+        }
+    };
+
+}();
+
+//base64 script.........................................
+(function(r){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=r()}else if(typeof define==="function"&&define.amd){define([],r)}else{var e;if(typeof window!=="undefined"){e=window}else if(typeof global!=="undefined"){e=global}else if(typeof self!=="undefined"){e=self}else{e=this}e.base64js=r()}})(function(){var r,e,t;return function r(e,t,n){function o(i,a){if(!t[i]){if(!e[i]){var u=typeof require=="function"&&require;if(!a&&u)return u(i,!0);if(f)return f(i,!0);var d=new Error("Cannot find module '"+i+"'");throw d.code="MODULE_NOT_FOUND",d}var c=t[i]={exports:{}};e[i][0].call(c.exports,function(r){var t=e[i][1][r];return o(t?t:r)},c,c.exports,r,e,t,n)}return t[i].exports}var f=typeof require=="function"&&require;for(var i=0;i<n.length;i++)o(n[i]);return o}({"/":[function(r,e,t){"use strict";t.byteLength=c;t.toByteArray=v;t.fromByteArray=s;var n=[];var o=[];var f=typeof Uint8Array!=="undefined"?Uint8Array:Array;var i="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";for(var a=0,u=i.length;a<u;++a){n[a]=i[a];o[i.charCodeAt(a)]=a}o["-".charCodeAt(0)]=62;o["_".charCodeAt(0)]=63;function d(r){var e=r.length;if(e%4>0){throw new Error("Invalid string. Length must be a multiple of 4")}return r[e-2]==="="?2:r[e-1]==="="?1:0}function c(r){return r.length*3/4-d(r)}function v(r){var e,t,n,i,a,u;var c=r.length;a=d(r);u=new f(c*3/4-a);n=a>0?c-4:c;var v=0;for(e=0,t=0;e<n;e+=4,t+=3){i=o[r.charCodeAt(e)]<<18|o[r.charCodeAt(e+1)]<<12|o[r.charCodeAt(e+2)]<<6|o[r.charCodeAt(e+3)];u[v++]=i>>16&255;u[v++]=i>>8&255;u[v++]=i&255}if(a===2){i=o[r.charCodeAt(e)]<<2|o[r.charCodeAt(e+1)]>>4;u[v++]=i&255}else if(a===1){i=o[r.charCodeAt(e)]<<10|o[r.charCodeAt(e+1)]<<4|o[r.charCodeAt(e+2)]>>2;u[v++]=i>>8&255;u[v++]=i&255}return u}function l(r){return n[r>>18&63]+n[r>>12&63]+n[r>>6&63]+n[r&63]}function h(r,e,t){var n;var o=[];for(var f=e;f<t;f+=3){n=(r[f]<<16)+(r[f+1]<<8)+r[f+2];o.push(l(n))}return o.join("")}function s(r){var e;var t=r.length;var o=t%3;var f="";var i=[];var a=16383;for(var u=0,d=t-o;u<d;u+=a){i.push(h(r,u,u+a>d?d:u+a))}if(o===1){e=r[t-1];f+=n[e>>2];f+=n[e<<4&63];f+="=="}else if(o===2){e=(r[t-2]<<8)+r[t-1];f+=n[e>>10];f+=n[e>>4&63];f+=n[e<<2&63];f+="="}i.push(f);return i.join("")}},{}]},{},[])("/")});
+    </script>
+    </head>
+    <body>  
+        <canvas id="simple_sketch" width="800" height="300"></canvas>   
+<script type="text/javascript">
+  $(function() {
+    $('#simple_sketch').sketch();
+  });
+ $(function() { 
+    $("#btnSave").click(function() { 
+        html2canvas($("#simple_sketch"), {
+            onrendered: function(canvas) {
+                theCanvas = canvas;
+                document.body.appendChild(canvas);
+
+                // Convert and download as image 
+                Canvas2Image.saveAsPNG(canvas); 
+                $("#img-out").append(canvas);
+                // Clean up 
+                //document.body.removeChild(canvas);
+            }
+        });
+    });
+}); 
+</script>
+<input type="button" id="btnSave" value="Save PNG"/>
+<div  id="img-out">Image</div>
+<button onClick="makeURI(); return false;">Url</button>
+</body>
+</apex:page>
